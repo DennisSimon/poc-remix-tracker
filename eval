@@ -1,0 +1,17 @@
+- no unlocking of esbuild config
+- no middlewares
+- less stable (possibly)
+- getting mui to work is annoying
+
+* easy to fetch server side data
+* nested routes
+* parallel loading
+* loading times in general
+  fetching data and resources is better
+  loading is better
+
+routing is easier in remix
+
+loader approach
+
+knex.js loading is more difficult
