@@ -1,7 +1,5 @@
 import { Box, Grid } from "@mui/material";
 import type { MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
 import React, { useEffect, useState } from "react";
 import { CardWithHeader } from "~/src/components";
 import {
@@ -40,32 +38,11 @@ type Data = {
   avgTradeSize: string;
 };
 
-export const loader = async () => {
-  const requests = [
-    fetch("https://api.0xtracker.com/stats/network?period=month"),
-    fetch("https://api.0xtracker.com/stats/trader?period=month"),
-  ];
-
-  const results = await Promise.all(requests);
-
-  const [networkData, traderData] = await Promise.all(
-    results.map((res) => res.json())
-  );
-
-  const out: Data = {
-    volume: `$${abbreviateNumber(networkData.tradeVolume)}`,
-    trades: abbreviateNumber(networkData.tradeCount),
-    traders: abbreviateNumber(traderData.traderCount),
-    avgTradeSize: `$${abbreviateNumber(
-      networkData.tradeVolume / networkData.tradeCount
-    )}`,
-  };
-
-  return json(out);
-};
-
 export default function Index() {
-  const { volume, trades, traders, avgTradeSize }: Data = useLoaderData();
+  const [mainMetrics, setMainMetrics] = useState<{
+    loading: boolean;
+    data: Data | null;
+  }>({ loading: true, data: null });
   const [data1, setdata1] = useState({ loading: true, data: null });
   const [data2, setdata2] = useState({ loading: true, data: null });
 
@@ -74,19 +51,35 @@ export default function Index() {
 
   useEffect(() => {
     const d1 = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const requests = [
+        fetch("https://api.0xtracker.com/stats/network?period=month").then(
+          (res) => res.json()
+        ),
+        fetch("https://api.0xtracker.com/stats/trader?period=month").then(
+          (res) => res.json()
+        ),
+        getNetworkInfoAsync("hour", "day"),
+        getAppInfoAsync(5, "day"),
+      ];
+      const [networkData, traderData, rawChartData, rawPerformersData] =
+        await Promise.all(requests);
+      const metricData: Data = {
+        volume: `$${abbreviateNumber(networkData.tradeVolume)}`,
+        trades: abbreviateNumber(networkData.tradeCount),
+        traders: abbreviateNumber(traderData.traderCount),
+        avgTradeSize: `$${abbreviateNumber(
+          networkData.tradeVolume / networkData.tradeCount
+        )}`,
+      };
+
+      setMainMetrics(metricData);
       setdata1({ loading: false, data: "$10.9b" });
-      await new Promise((resolve) => setTimeout(resolve, 800));
       setdata2({ loading: false, data: "5.42k" });
-      const rawChartData = await getNetworkInfoAsync("hour", "day");
       const data = rawChartData.map((item) => ({
         x: new Date(item.date),
         y: item.tradeVolume,
       }));
       setChartData({ loading: false, data });
-
-      const rawPerformersData = await getAppInfoAsync(5, "day");
-
       setPerformers({ loading: false, data: rawPerformersData });
     };
 
@@ -97,18 +90,31 @@ export default function Index() {
     <Box>
       <Grid container columnSpacing={1} columns={12}>
         <Grid item xs={3}>
-          <CardWithHeader header="Volume (30 D)" content={volume} />
+          <CardWithHeader
+            header="Volume (30 D)"
+            content={mainMetrics.data?.volume}
+            loading={mainMetrics.loading}
+          />
         </Grid>
         <Grid item xs={3}>
-          <CardWithHeader header="Trades (30 D)" content={trades} />
+          <CardWithHeader
+            header="Trades (30 D)"
+            content={mainMetrics.data?.trades}
+            loading={mainMetrics.loading}
+          />
         </Grid>
         <Grid item xs={3}>
-          <CardWithHeader header="Traders (30 D)" content={traders} />
+          <CardWithHeader
+            header="Traders (30 D)"
+            content={mainMetrics.data?.traders}
+            loading={mainMetrics.loading}
+          />
         </Grid>
         <Grid item xs={3}>
           <CardWithHeader
             header="Avg Trade Size (30 D)"
-            content={avgTradeSize}
+            content={mainMetrics.data?.avgTradeSize}
+            loading={mainMetrics.loading}
           />
         </Grid>
       </Grid>
