@@ -15,3 +15,6 @@ routing is easier in remix
 loader approach
 
 knex.js loading is more difficult
+
+vercel: https://webpagetest.org/result/220411_AiDcRD_HBE/
+fly.io https://remix-poc.fly.dev/

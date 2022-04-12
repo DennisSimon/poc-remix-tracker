@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Drawer, Grid, Snackbar, Typography } from "@mui/material";
 import { Button } from "@Components";
-import { ethers } from "ethers";
+import { ethers } from "../api/ethers.client";
 import { useState } from "react";
 
 type NavigationProps = {
@@ -62,7 +62,9 @@ export const Navigation = ({
   const [connected, setConnected] = useState(false);
 
   const connectWallet: () => Promise<void> = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const provider = new ethers.providers.Web3Provider(
+      (window as any).ethereum
+    );
     await provider.send("eth_requestAccounts", []);
 
     const signer = provider.getSigner();

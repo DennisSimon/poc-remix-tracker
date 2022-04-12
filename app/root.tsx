@@ -1,9 +1,4 @@
-import type {
-  LinksFunction,
-  LoaderFunction,
-  MetaFunction,
-} from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -17,30 +12,14 @@ import { unstable_useEnhancedEffect as useEnhancedEffect } from "@mui/material";
 import { theme } from "~/src/styles/theme";
 import ClientStyleContext from "./src/ClientStyleContext";
 
-import tailwindStylesheetUrl from "./styles/tailwind.css";
-import { getUser } from "./session.server";
 import { useContext } from "react";
 import { Layout } from "./src/Layout";
-
-export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
-};
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
   title: "Remix Notes",
   viewport: "width=device-width,initial-scale=1",
 });
-
-type LoaderData = {
-  user: Awaited<ReturnType<typeof getUser>>;
-};
-
-export const loader: LoaderFunction = async ({ request }) => {
-  return json<LoaderData>({
-    user: await getUser(request),
-  });
-};
 
 interface DocumentProps {
   children: React.ReactNode;
@@ -76,10 +55,6 @@ const Document = withEmotionCache(
           {title ? <title>{title}</title> : null}
           <Meta />
           <Links />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-          />
           <meta
             name="emotion-insertion-point"
             content="emotion-insertion-point"

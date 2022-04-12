@@ -88,6 +88,10 @@ export default function Index() {
 
   return (
     <Box>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      />
       <Grid container columnSpacing={1} columns={12}>
         <Grid item xs={3}>
           <CardWithHeader
